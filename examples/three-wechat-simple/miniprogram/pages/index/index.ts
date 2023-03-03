@@ -5,6 +5,9 @@ import {
   Scene,
   sRGBEncoding,
   WebGL1Renderer,
+  TextureLoader,
+  NearestFilter,
+  MeshBasicMaterial,
 } from 'three';
 import { WechatPlatform, PlatformManager } from 'platformize-three';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -32,6 +35,14 @@ Page({
         const gltfLoader = new GLTFLoader();
         const controls = new OrbitControls(camera, canvas);
         controls.enableDamping = true;
+      
+        const textureLoader = new TextureLoader()
+        const texture = await textureLoader.loadAsync(
+          'https://xxx/贴图.jpg'
+        )
+        texture.flipY = false
+        texture.encoding = sRGBEncoding
+        texture.minFilter = NearestFilter
 
         gltfLoader
           .loadAsync(
@@ -41,6 +52,13 @@ Page({
             // @ts-ignore
             gltf.parser = null;
             gltf.scene.position.y = -2;
+            gltf.scene.traverse(child => {
+              if (child.isMesh) {
+                child.material = new MeshBasicMaterial({
+                  map: texture,
+                })
+              }
+            })
             scene.add(gltf.scene);
           });
 
